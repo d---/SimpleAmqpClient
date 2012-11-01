@@ -34,6 +34,7 @@
 
 #include "SimpleAmqpClient/AmqpResponseLibraryException.h"
 #include "SimpleAmqpClient/ConsumerTagNotFoundException.h"
+#include "SimpleAmqpClient/BadUriException.h"
 #include "SimpleAmqpClient/MessageReturnedException.h"
 #include "SimpleAmqpClient/Util.h"
 #include "SimpleAmqpClient/ChannelImpl.h"
@@ -60,6 +61,26 @@ namespace AmqpClient {
 const std::string Channel::EXCHANGE_TYPE_DIRECT("direct");
 const std::string Channel::EXCHANGE_TYPE_FANOUT("fanout");
 const std::string Channel::EXCHANGE_TYPE_TOPIC("topic");
+
+Channel::ptr_t Channel::CreateFromUri(const std::string &uri, int frame_max)
+{
+  amqp_connection_info info;
+  amqp_default_connection_info(&info);
+
+  boost::shared_ptr<char> uri_dup = boost::shared_ptr<char>(strdup(uri.c_str()), free);
+
+  if (0 != amqp_parse_url(uri_dup.get(), &info))
+  {
+    throw BadUriException();
+  }
+
+  return Create(std::string(info.host),
+                info.port,
+                std::string(info.user),
+                std::string(info.password),
+                std::string(info.vhost),
+                frame_max);
+}
 
 Channel::Channel(const std::string& host,
                  int port,
