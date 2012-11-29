@@ -54,6 +54,8 @@
 #include <boost/cstdint.hpp>
 #include <boost/limits.hpp>
 
+#include <string.h>
+
 #define BROKER_HEARTBEAT 0
 
 namespace AmqpClient {
